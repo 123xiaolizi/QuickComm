@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/QuickComm.dir/QuickComm.cc.o  -o ../../bin/QuickComm   -L/home/work/QuickComm/lib  -Wl,-rpath,/home/work/QuickComm/lib ../../lib/libpublic.a 

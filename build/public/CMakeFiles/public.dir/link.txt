@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libpublic.a  CMakeFiles/public.dir/qc_conf.cc.o CMakeFiles/public.dir/qc_log.cc.o CMakeFiles/public.dir/qc_printf.cc.o CMakeFiles/public.dir/qc_public.cc.o
+/usr/bin/ranlib ../../lib/libpublic.a
