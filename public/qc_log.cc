@@ -1,5 +1,6 @@
 #include "qc_public.h"
 #include "qc_conf.h"
+#include <qc_macro.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,15 +34,15 @@ void qc_log_init()
     size_t nlen;
 
     // 从配置文件中读取日志相关配置
-    CConfig conf = CConfig::GetInstance();
-    plogname = (u_char *)conf.GetString("Log");
+    CConfig* conf = CConfig::GetInstance();
+    plogname = (u_char *)conf->GetString("Log");
 
     if (plogname == nullptr)
     {
         // 没读取到，给缺省路径文件名
         plogname = (u_char *)QC_ERROR_LOG_PATH;
     }
-    qc_log.log_level = conf.GetIntDefault("LogLevel", QC_LOG_NOTICE); // 缺省等级
+    qc_log.log_level = conf->GetIntDefault("LogLevel", QC_LOG_NOTICE); // 缺省等级
     // 绕过内核缓冲区，write()成功则写磁盘必然成功，但效率可能会比较低
     qc_log.fd = open((const char *)plogname, O_WRONLY | O_APPEND | O_CREAT, 0644);
     if (qc_log.fd == -1)
@@ -147,7 +148,7 @@ void qc_log_error_core(int level, int err, const char *fmt, ...)
     //若位置不够，那换行也要硬插入到末尾，哪怕覆盖到其他内容
     if (p >= (last - 1))
     {
-        p = (last - 1) - 1; //把尾部空格留出来，这里感觉nginx处理的似乎就不对 
+        p = (last - 1) - 1; //把尾部空格留出来
                              //我觉得，last-1，才是最后 一个而有效的内存，而这个位置要保存\0，所以我认为再减1，这个位置，才适合保存\n
     }
     *p++ = '\n'; //增加个换行符       

@@ -1,4 +1,5 @@
 #include "qc_public.h"
+#include "qc_macro.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +31,7 @@ u_char *qc_slprintf(u_char *buf, u_char *last, const char *fmt, ...)
 }
 u_char *qc_vslprintf(u_char *buf, u_char *last, const char *fmt, va_list args)
 {
-    //比如说你要调用ngx_log_stderr(0, "invalid option: \"%s\"", argv[i]);，那么这里的fmt就应该是:   invalid option: "%s"
+    //比如说你要调用qc_log_stderr(0, "invalid option: \"%s\"", argv[i]);，那么这里的fmt就应该是:   invalid option: "%s"
     //printf("fmt = %s\n",fmt);
     
     u_char     zero;
@@ -129,7 +130,7 @@ u_char *qc_vslprintf(u_char *buf, u_char *last, const char *fmt, va_list args)
                 }
                 break;  //这break掉，直接跳道switch后边的代码去执行,这种凡是break的，都不做fmt++;  *********************【switch后仍旧需要进一步处理】
 
-             case 'i': //转换ngx_int_t型数据，如果用%ui，则转换的数据类型是ngx_uint_t  
+             case 'i': //转换qc_int_t型数据，如果用%ui，则转换的数据类型是qc_uint_t  
                 if (sign) 
                 {
                     i64 = (int64_t) va_arg(args, intptr_t);
@@ -141,7 +142,7 @@ u_char *qc_vslprintf(u_char *buf, u_char *last, const char *fmt, va_list args)
 
                 //if (max_width) 
                 //{
-                //    width = NGX_INT_T_LEN;
+                //    width = qc_INT_T_LEN;
                 //}
 
                 break;    

@@ -1,5 +1,8 @@
 /home/work/QuickComm/build/CMakeFiles/rebuild_cache.dir
 /home/work/QuickComm/build/CMakeFiles/edit_cache.dir
+/home/work/QuickComm/build/proc/CMakeFiles/rebuild_cache.dir
+/home/work/QuickComm/build/proc/CMakeFiles/edit_cache.dir
+/home/work/QuickComm/build/proc/CMakeFiles/proc.dir
 /home/work/QuickComm/build/public/CMakeFiles/rebuild_cache.dir
 /home/work/QuickComm/build/public/CMakeFiles/edit_cache.dir
 /home/work/QuickComm/build/public/CMakeFiles/public.dir

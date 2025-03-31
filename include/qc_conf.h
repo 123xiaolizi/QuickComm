@@ -15,27 +15,44 @@ typedef struct _CConfItem
 class CConfig
 {
 
-private:
-	CConfig() = default;
-    
+    private:
+	CConfig();
 public:
-    ~CConfig();
+	~CConfig();
+private:
+	static CConfig *m_instance;
 
-    CConfig& operator=(const CConfig&) = delete;
-
+public:	
+	static CConfig* GetInstance() 
+	{	
+		if(m_instance == NULL)
+		{
+			//锁
+			if(m_instance == NULL)
+			{					
+				m_instance = new CConfig();
+				static CGarhuishou cl; 
+			}
+			//放锁		
+		}
+		return m_instance;
+	}	
+	class CGarhuishou  //类中套类，用于释放对象
+	{
+	public:				
+		~CGarhuishou()
+		{
+			if (CConfig::m_instance)
+			{						
+				delete CConfig::m_instance;				
+				CConfig::m_instance = NULL;				
+			}
+		}
+	};
 //---------------------------------------------------
 public:
-    //获取CConfig对象
-    static CConfig& GetInstance()
-    {
-        static CConfig instance;
-        return instance;
-    }
-    //装载配置文件
-    bool Load(const char *pconfName);
-    //根据ItemName获取配置信息字符串，不修改不用互斥
+    bool Load(const char *pconfName); //装载配置文件
 	const char *GetString(const char *p_itemname);
-    //根据ItemName获取数字类型配置信息
 	int  GetIntDefault(const char *p_itemname,const int def);
 
 public:

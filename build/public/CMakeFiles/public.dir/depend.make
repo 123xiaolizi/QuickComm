@@ -6,9 +6,11 @@ public/CMakeFiles/public.dir/qc_conf.cc.o: ../include/qc_public.h
 public/CMakeFiles/public.dir/qc_conf.cc.o: ../public/qc_conf.cc
 
 public/CMakeFiles/public.dir/qc_log.cc.o: ../include/qc_conf.h
+public/CMakeFiles/public.dir/qc_log.cc.o: ../include/qc_macro.h
 public/CMakeFiles/public.dir/qc_log.cc.o: ../include/qc_public.h
 public/CMakeFiles/public.dir/qc_log.cc.o: ../public/qc_log.cc
 
+public/CMakeFiles/public.dir/qc_printf.cc.o: ../include/qc_macro.h
 public/CMakeFiles/public.dir/qc_printf.cc.o: ../include/qc_public.h
 public/CMakeFiles/public.dir/qc_printf.cc.o: ../public/qc_printf.cc
 

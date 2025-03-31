@@ -39,6 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+  include("/home/work/QuickComm/build/proc/cmake_install.cmake")
   include("/home/work/QuickComm/build/public/cmake_install.cmake")
   include("/home/work/QuickComm/build/app/cmake_install.cmake")
 

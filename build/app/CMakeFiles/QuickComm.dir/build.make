@@ -80,6 +80,7 @@ QuickComm_EXTERNAL_OBJECTS =
 ../bin/QuickComm: app/CMakeFiles/QuickComm.dir/QuickComm.cc.o
 ../bin/QuickComm: app/CMakeFiles/QuickComm.dir/build.make
 ../bin/QuickComm: ../lib/libpublic.a
+../bin/QuickComm: ../lib/libproc.a
 ../bin/QuickComm: app/CMakeFiles/QuickComm.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable ../../bin/QuickComm"
 	cd /home/work/QuickComm/build/app && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/QuickComm.dir/link.txt --verbose=$(VERBOSE)

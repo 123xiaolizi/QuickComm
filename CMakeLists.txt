@@ -18,7 +18,7 @@ set(APP_NAME QuickComm)
 
 #添加子目录
 #add_subdirectory(net)
-#add_subdirectory(proc)
+add_subdirectory(proc)
 add_subdirectory(public)
 #add_subdirectory(signal)
 add_subdirectory(app)

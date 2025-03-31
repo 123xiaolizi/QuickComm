@@ -111,6 +111,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named proc
+
+# Build rule for target.
+proc: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 proc
+.PHONY : proc
+
+# fast build rule for target.
+proc/fast:
+	$(MAKE) -f proc/CMakeFiles/proc.dir/build.make proc/CMakeFiles/proc.dir/build
+.PHONY : proc/fast
+
+#=============================================================================
 # Target rules for targets named public
 
 # Build rule for target.
@@ -144,6 +157,7 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... proc"
 	@echo "... public"
 	@echo "... QuickComm"
 .PHONY : help

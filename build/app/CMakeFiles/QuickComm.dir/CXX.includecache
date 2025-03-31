@@ -10,6 +10,8 @@
 vector
 -
 
+../include/qc_macro.h
+
 ../include/qc_public.h
 sys/types.h
 -
@@ -21,6 +23,14 @@ qc_conf.h
 /home/work/QuickComm/app/qc_conf.h
 qc_public.h
 /home/work/QuickComm/app/qc_public.h
+qc_macro.h
+/home/work/QuickComm/app/qc_macro.h
 iostream
+-
+sys/types.h
+-
+unistd.h
+-
+string.h
 -
 

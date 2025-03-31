@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libproc.a  CMakeFiles/proc.dir/qc_daemon.cc.o CMakeFiles/proc.dir/qc_process_cycle.cc.o CMakeFiles/proc.dir/qc_setproctitle.cc.o
+/usr/bin/ranlib ../../lib/libproc.a

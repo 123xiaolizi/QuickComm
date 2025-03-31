@@ -3,5 +3,6 @@
 
 app/CMakeFiles/QuickComm.dir/QuickComm.cc.o
  ../include/qc_conf.h
+ ../include/qc_macro.h
  ../include/qc_public.h
  /home/work/QuickComm/app/QuickComm.cc

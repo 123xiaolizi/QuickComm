@@ -53,18 +53,21 @@ CMAKE_BINARY_DIR = /home/work/QuickComm/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: proc/all
 all: public/all
 all: app/all
 
 .PHONY : all
 
 # The main recursive "preinstall" target.
+preinstall: proc/preinstall
 preinstall: public/preinstall
 preinstall: app/preinstall
 
 .PHONY : preinstall
 
 # The main recursive "clean" target.
+clean: proc/clean
 clean: public/clean
 clean: app/clean
 
@@ -89,6 +92,24 @@ app/clean: app/CMakeFiles/QuickComm.dir/clean
 .PHONY : app/clean
 
 #=============================================================================
+# Directory level rules for directory proc
+
+# Recursive "all" directory target.
+proc/all: proc/CMakeFiles/proc.dir/all
+
+.PHONY : proc/all
+
+# Recursive "preinstall" directory target.
+proc/preinstall:
+
+.PHONY : proc/preinstall
+
+# Recursive "clean" directory target.
+proc/clean: proc/CMakeFiles/proc.dir/clean
+
+.PHONY : proc/clean
+
+#=============================================================================
 # Directory level rules for directory public
 
 # Recursive "all" directory target.
@@ -107,13 +128,40 @@ public/clean: public/CMakeFiles/public.dir/clean
 .PHONY : public/clean
 
 #=============================================================================
+# Target rules for target proc/CMakeFiles/proc.dir
+
+# All Build rule for target.
+proc/CMakeFiles/proc.dir/all:
+	$(MAKE) -f proc/CMakeFiles/proc.dir/build.make proc/CMakeFiles/proc.dir/depend
+	$(MAKE) -f proc/CMakeFiles/proc.dir/build.make proc/CMakeFiles/proc.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=3,4,5,6 "Built target proc"
+.PHONY : proc/CMakeFiles/proc.dir/all
+
+# Build rule for subdir invocation for target.
+proc/CMakeFiles/proc.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/work/QuickComm/build/CMakeFiles 4
+	$(MAKE) -f CMakeFiles/Makefile2 proc/CMakeFiles/proc.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/work/QuickComm/build/CMakeFiles 0
+.PHONY : proc/CMakeFiles/proc.dir/rule
+
+# Convenience name for target.
+proc: proc/CMakeFiles/proc.dir/rule
+
+.PHONY : proc
+
+# clean rule for target.
+proc/CMakeFiles/proc.dir/clean:
+	$(MAKE) -f proc/CMakeFiles/proc.dir/build.make proc/CMakeFiles/proc.dir/clean
+.PHONY : proc/CMakeFiles/proc.dir/clean
+
+#=============================================================================
 # Target rules for target public/CMakeFiles/public.dir
 
 # All Build rule for target.
 public/CMakeFiles/public.dir/all:
 	$(MAKE) -f public/CMakeFiles/public.dir/build.make public/CMakeFiles/public.dir/depend
 	$(MAKE) -f public/CMakeFiles/public.dir/build.make public/CMakeFiles/public.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=3,4,5,6,7 "Built target public"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=7,8,9,10,11 "Built target public"
 .PHONY : public/CMakeFiles/public.dir/all
 
 # Build rule for subdir invocation for target.
@@ -137,6 +185,7 @@ public/CMakeFiles/public.dir/clean:
 # Target rules for target app/CMakeFiles/QuickComm.dir
 
 # All Build rule for target.
+app/CMakeFiles/QuickComm.dir/all: proc/CMakeFiles/proc.dir/all
 app/CMakeFiles/QuickComm.dir/all: public/CMakeFiles/public.dir/all
 	$(MAKE) -f app/CMakeFiles/QuickComm.dir/build.make app/CMakeFiles/QuickComm.dir/depend
 	$(MAKE) -f app/CMakeFiles/QuickComm.dir/build.make app/CMakeFiles/QuickComm.dir/build
@@ -145,7 +194,7 @@ app/CMakeFiles/QuickComm.dir/all: public/CMakeFiles/public.dir/all
 
 # Build rule for subdir invocation for target.
 app/CMakeFiles/QuickComm.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/work/QuickComm/build/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/work/QuickComm/build/CMakeFiles 11
 	$(MAKE) -f CMakeFiles/Makefile2 app/CMakeFiles/QuickComm.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/work/QuickComm/build/CMakeFiles 0
 .PHONY : app/CMakeFiles/QuickComm.dir/rule

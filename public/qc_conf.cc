@@ -3,6 +3,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+//静态成员赋值
+CConfig *CConfig::m_instance = NULL;
+
+//构造函数
+CConfig::CConfig()
+{		
+}
+
 CConfig::~CConfig()
 {
     std::vector<LPCConfItem>::iterator pos;	
@@ -76,12 +85,14 @@ const char *CConfig::GetString(const char *p_itemname)
 //根据ItemName获取数字类型配置信息
 int  CConfig::GetIntDefault(const char *p_itemname,const int def)
 {
-    for ( const auto it : m_ConfigItemList)
-    {
-        if (strcasecmp(p_itemname,it->ItemName) == 0)
+    
+    std::vector<LPCConfItem>::iterator pos;	
+	for(pos = m_ConfigItemList.begin(); pos !=m_ConfigItemList.end(); ++pos)
+	{	
+		if(strcasecmp( (*pos)->ItemName,p_itemname) == 0)
         {
-            return atoi(it->ItemContent);
-        } 
-    }
-    return def;
+            return atoi((*pos)->ItemContent);
+        }
+	}//end for
+	return def;
 }

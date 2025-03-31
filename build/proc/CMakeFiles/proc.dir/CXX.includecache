@@ -1,0 +1,42 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/qc_conf.h
+vector
+-
+
+../include/qc_macro.h
+
+../include/qc_public.h
+sys/types.h
+-
+cstdarg
+-
+
+/home/work/QuickComm/proc/qc_process_cycle.cc
+stdio.h
+-
+stdlib.h
+-
+unistd.h
+-
+string.h
+-
+signal.h
+-
+errno.h
+-
+unistd.h
+-
+qc_macro.h
+/home/work/QuickComm/proc/qc_macro.h
+qc_public.h
+/home/work/QuickComm/proc/qc_public.h
+qc_conf.h
+/home/work/QuickComm/proc/qc_conf.h
+
