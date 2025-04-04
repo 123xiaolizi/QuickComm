@@ -59,7 +59,7 @@ void qc_master_process_cycle()
             strcat(title, g_os_argv[i]);
         }
         qc_setproctitle(title);//设置标题
-        qc_log_error_core(QC_LOG_NOTICE, 0, "%s %P [master进程] 启动并开始运行......!",title,qc_pid);
+        qc_log_error_core(QC_LOG_NOTICE, 0, "%s %d [master进程] 启动并开始运行......!",title,qc_pid);
     }
 
     //从配置文件中读取要创建工作进程的数量
@@ -131,7 +131,7 @@ static void qc_worker_process_cycle(int inum,const char *pprocname)
     //设置进程名
     qc_worker_process_init(inum);
     qc_setproctitle(pprocname);
-    qc_log_error_core(QC_LOG_NOTICE, 0, "%S %P [worker进程]启动并开始运行。。。", pprocname, qc_pid);
+    qc_log_error_core(QC_LOG_NOTICE, 0, "%s %d [worker进程]启动并开始运行。。。", pprocname, qc_pid);
     for(;;)
     {
         //处理网络事件和定时器事件

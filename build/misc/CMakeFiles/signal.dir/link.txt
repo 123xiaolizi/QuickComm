@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../lib/libsignal.a  CMakeFiles/signal.dir/qc_memory.cc.o CMakeFiles/signal.dir/qc_threadpool.cc.o
+/usr/bin/ranlib ../../lib/libsignal.a

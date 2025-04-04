@@ -10,6 +10,8 @@
 vector
 -
 
+../include/qc_macro.h
+
 ../include/qc_public.h
 sys/types.h
 -
@@ -26,5 +28,33 @@ stdlib.h
 stdio.h
 -
 string.h
+-
+
+/home/work/QuickComm/public/qc_log.cc
+qc_public.h
+/home/work/QuickComm/public/qc_public.h
+qc_conf.h
+/home/work/QuickComm/public/qc_conf.h
+qc_macro.h
+-
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+stdint.h
+-
+stdarg.h
+-
+unistd.h
+-
+sys/time.h
+-
+time.h
+-
+fcntl.h
+-
+errno.h
 -
 

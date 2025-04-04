@@ -72,6 +72,7 @@ int main(int argc, char *const *argv )
         {
             //这是原始的父进程
             freeresource();
+            return exitcode;
         }
     }
 

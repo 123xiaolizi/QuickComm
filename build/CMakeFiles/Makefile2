@@ -53,6 +53,8 @@ CMAKE_BINARY_DIR = /home/work/QuickComm/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: net/all
+all: misc/all
 all: proc/all
 all: public/all
 all: app/all
@@ -60,6 +62,8 @@ all: app/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
+preinstall: net/preinstall
+preinstall: misc/preinstall
 preinstall: proc/preinstall
 preinstall: public/preinstall
 preinstall: app/preinstall
@@ -67,6 +71,8 @@ preinstall: app/preinstall
 .PHONY : preinstall
 
 # The main recursive "clean" target.
+clean: net/clean
+clean: misc/clean
 clean: proc/clean
 clean: public/clean
 clean: app/clean
@@ -90,6 +96,42 @@ app/preinstall:
 app/clean: app/CMakeFiles/QuickComm.dir/clean
 
 .PHONY : app/clean
+
+#=============================================================================
+# Directory level rules for directory misc
+
+# Recursive "all" directory target.
+misc/all: misc/CMakeFiles/signal.dir/all
+
+.PHONY : misc/all
+
+# Recursive "preinstall" directory target.
+misc/preinstall:
+
+.PHONY : misc/preinstall
+
+# Recursive "clean" directory target.
+misc/clean: misc/CMakeFiles/signal.dir/clean
+
+.PHONY : misc/clean
+
+#=============================================================================
+# Directory level rules for directory net
+
+# Recursive "all" directory target.
+net/all: net/CMakeFiles/net.dir/all
+
+.PHONY : net/all
+
+# Recursive "preinstall" directory target.
+net/preinstall:
+
+.PHONY : net/preinstall
+
+# Recursive "clean" directory target.
+net/clean: net/CMakeFiles/net.dir/clean
+
+.PHONY : net/clean
 
 #=============================================================================
 # Directory level rules for directory proc
@@ -128,13 +170,67 @@ public/clean: public/CMakeFiles/public.dir/clean
 .PHONY : public/clean
 
 #=============================================================================
+# Target rules for target net/CMakeFiles/net.dir
+
+# All Build rule for target.
+net/CMakeFiles/net.dir/all:
+	$(MAKE) -f net/CMakeFiles/net.dir/build.make net/CMakeFiles/net.dir/depend
+	$(MAKE) -f net/CMakeFiles/net.dir/build.make net/CMakeFiles/net.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=3,4,5 "Built target net"
+.PHONY : net/CMakeFiles/net.dir/all
+
+# Build rule for subdir invocation for target.
+net/CMakeFiles/net.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/work/QuickComm/build/CMakeFiles 3
+	$(MAKE) -f CMakeFiles/Makefile2 net/CMakeFiles/net.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/work/QuickComm/build/CMakeFiles 0
+.PHONY : net/CMakeFiles/net.dir/rule
+
+# Convenience name for target.
+net: net/CMakeFiles/net.dir/rule
+
+.PHONY : net
+
+# clean rule for target.
+net/CMakeFiles/net.dir/clean:
+	$(MAKE) -f net/CMakeFiles/net.dir/build.make net/CMakeFiles/net.dir/clean
+.PHONY : net/CMakeFiles/net.dir/clean
+
+#=============================================================================
+# Target rules for target misc/CMakeFiles/signal.dir
+
+# All Build rule for target.
+misc/CMakeFiles/signal.dir/all:
+	$(MAKE) -f misc/CMakeFiles/signal.dir/build.make misc/CMakeFiles/signal.dir/depend
+	$(MAKE) -f misc/CMakeFiles/signal.dir/build.make misc/CMakeFiles/signal.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=15,16,17 "Built target signal"
+.PHONY : misc/CMakeFiles/signal.dir/all
+
+# Build rule for subdir invocation for target.
+misc/CMakeFiles/signal.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/work/QuickComm/build/CMakeFiles 3
+	$(MAKE) -f CMakeFiles/Makefile2 misc/CMakeFiles/signal.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/work/QuickComm/build/CMakeFiles 0
+.PHONY : misc/CMakeFiles/signal.dir/rule
+
+# Convenience name for target.
+signal: misc/CMakeFiles/signal.dir/rule
+
+.PHONY : signal
+
+# clean rule for target.
+misc/CMakeFiles/signal.dir/clean:
+	$(MAKE) -f misc/CMakeFiles/signal.dir/build.make misc/CMakeFiles/signal.dir/clean
+.PHONY : misc/CMakeFiles/signal.dir/clean
+
+#=============================================================================
 # Target rules for target proc/CMakeFiles/proc.dir
 
 # All Build rule for target.
 proc/CMakeFiles/proc.dir/all:
 	$(MAKE) -f proc/CMakeFiles/proc.dir/build.make proc/CMakeFiles/proc.dir/depend
 	$(MAKE) -f proc/CMakeFiles/proc.dir/build.make proc/CMakeFiles/proc.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=3,4,5,6 "Built target proc"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=6,7,8,9 "Built target proc"
 .PHONY : proc/CMakeFiles/proc.dir/all
 
 # Build rule for subdir invocation for target.
@@ -161,7 +257,7 @@ proc/CMakeFiles/proc.dir/clean:
 public/CMakeFiles/public.dir/all:
 	$(MAKE) -f public/CMakeFiles/public.dir/build.make public/CMakeFiles/public.dir/depend
 	$(MAKE) -f public/CMakeFiles/public.dir/build.make public/CMakeFiles/public.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=7,8,9,10,11 "Built target public"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/work/QuickComm/build/CMakeFiles --progress-num=10,11,12,13,14 "Built target public"
 .PHONY : public/CMakeFiles/public.dir/all
 
 # Build rule for subdir invocation for target.

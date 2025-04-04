@@ -1,5 +1,11 @@
 /home/work/QuickComm/build/CMakeFiles/rebuild_cache.dir
 /home/work/QuickComm/build/CMakeFiles/edit_cache.dir
+/home/work/QuickComm/build/net/CMakeFiles/rebuild_cache.dir
+/home/work/QuickComm/build/net/CMakeFiles/edit_cache.dir
+/home/work/QuickComm/build/net/CMakeFiles/net.dir
+/home/work/QuickComm/build/misc/CMakeFiles/rebuild_cache.dir
+/home/work/QuickComm/build/misc/CMakeFiles/edit_cache.dir
+/home/work/QuickComm/build/misc/CMakeFiles/signal.dir
 /home/work/QuickComm/build/proc/CMakeFiles/rebuild_cache.dir
 /home/work/QuickComm/build/proc/CMakeFiles/edit_cache.dir
 /home/work/QuickComm/build/proc/CMakeFiles/proc.dir

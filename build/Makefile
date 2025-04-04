@@ -111,6 +111,32 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named net
+
+# Build rule for target.
+net: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 net
+.PHONY : net
+
+# fast build rule for target.
+net/fast:
+	$(MAKE) -f net/CMakeFiles/net.dir/build.make net/CMakeFiles/net.dir/build
+.PHONY : net/fast
+
+#=============================================================================
+# Target rules for targets named signal
+
+# Build rule for target.
+signal: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 signal
+.PHONY : signal
+
+# fast build rule for target.
+signal/fast:
+	$(MAKE) -f misc/CMakeFiles/signal.dir/build.make misc/CMakeFiles/signal.dir/build
+.PHONY : signal/fast
+
+#=============================================================================
 # Target rules for targets named proc
 
 # Build rule for target.
@@ -157,6 +183,8 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
+	@echo "... net"
+	@echo "... signal"
 	@echo "... proc"
 	@echo "... public"
 	@echo "... QuickComm"

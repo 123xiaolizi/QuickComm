@@ -12,12 +12,14 @@ set(NET_LIB net)
 set(PROC_LIB proc)
 set(PUBLIC_LIB public)
 set(SIGNAL_LIB signal)
+set(MISC_LIB signal)
 
 #可执行程序名字
 set(APP_NAME QuickComm)
 
 #添加子目录
-#add_subdirectory(net)
+add_subdirectory(net)
+add_subdirectory(misc)
 add_subdirectory(proc)
 add_subdirectory(public)
 #add_subdirectory(signal)

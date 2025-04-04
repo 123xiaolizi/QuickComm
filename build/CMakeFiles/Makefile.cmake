@@ -12,6 +12,8 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.16.3/CMakeCCompiler.cmake"
   "CMakeFiles/3.16.3/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.16.3/CMakeSystem.cmake"
+  "../misc/CMakeLists.txt"
+  "../net/CMakeLists.txt"
   "../proc/CMakeLists.txt"
   "../public/CMakeLists.txt"
   "/usr/share/cmake-3.16/Modules/CMakeCInformation.cmake"
@@ -44,6 +46,8 @@ set(CMAKE_MAKEFILE_OUTPUTS
 # Byproducts of CMake generate step:
 set(CMAKE_MAKEFILE_PRODUCTS
   "CMakeFiles/CMakeDirectoryInformation.cmake"
+  "net/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "misc/CMakeFiles/CMakeDirectoryInformation.cmake"
   "proc/CMakeFiles/CMakeDirectoryInformation.cmake"
   "public/CMakeFiles/CMakeDirectoryInformation.cmake"
   "app/CMakeFiles/CMakeDirectoryInformation.cmake"
@@ -51,6 +55,8 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
+  "net/CMakeFiles/net.dir/DependInfo.cmake"
+  "misc/CMakeFiles/signal.dir/DependInfo.cmake"
   "proc/CMakeFiles/proc.dir/DependInfo.cmake"
   "public/CMakeFiles/public.dir/DependInfo.cmake"
   "app/CMakeFiles/QuickComm.dir/DependInfo.cmake"
