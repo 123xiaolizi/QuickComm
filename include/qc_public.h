@@ -1,6 +1,7 @@
 #ifndef __PUBLIC_H__
 #define __PUBLIC_H__
-
+#include "qc_socket.h"
+#include "qc_threadpool.h"
 #include <sys/types.h>
 #include <cstdarg>
 
@@ -30,6 +31,10 @@ extern int g_os_argc;
 extern char **g_os_argv;
 extern char *gp_envmem;
 extern int g_daemonized;
+
+extern CSocket  g_socket;
+//extern CLogicSocket  g_socket;  
+extern CThreadPool   g_threadpool;
 
 
 

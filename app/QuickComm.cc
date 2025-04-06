@@ -1,6 +1,8 @@
 #include "qc_conf.h"
 #include "qc_public.h"
 #include "qc_macro.h"
+#include "qc_socket.h"
+#include "qc_threadpool.h"
 #include <iostream>
 #include <sys/types.h>
 #include <unistd.h>
@@ -13,6 +15,12 @@ pid_t   qc_pid;                //当前进程的pid
 pid_t   qc_parent;             //父进程的pid
 int     qc_process;            //进程类型，比如master,worker进程等
 int     g_stopEvent;            //标志程序退出,0不退出1，退出
+
+
+//socket/线程池相关
+CSocket      g_socket;          //socket全局对象
+//CLogicSocket   g_socket;        //socket全局对象  
+CThreadPool    g_threadpool;    //线程池全局对象
 
 //和设置标题有关的全局量
 size_t  g_argvneedmem=0;        //保存下这些argv参数所需要的内存大小

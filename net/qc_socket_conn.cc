@@ -172,3 +172,86 @@ void CSocket::qc_close_connection(lpqc_connection_t pConn)
     }
     return;
 }
+
+//专门用来回收连接的线程
+void* CSocket::ServerRecyConnectionThread(void *threadData)
+{
+    ThreadItem *pThread = static_cast<ThreadItem*>(threadData);
+    CSocket *pSocketObj = pThread->_pThis;
+
+    time_t currtime;
+    int err;
+    std::list<lpqc_connection_t>::iterator pos, posend;
+    lpqc_connection_t p_Conn;
+
+    while(1)
+    {
+        //每次休息200毫秒
+        usleep(200 * 1000);//因为单位是微妙
+
+        if(pSocketObj->m_totol_recyconnection_n > 0)
+        {
+            currtime = time(nullptr);
+            err = pthread_mutex_lock(&pSocketObj->m_recyconnqueueMutex);
+            if(err != 0)
+            {
+                if(err != 0) qc_log_stderr(err,"CSocket::ServerRecyConnectionThread()中pthread_mutex_lock()失败，返回的错误码为%d!",err);
+            }
+lblRRTD:
+            pos = pSocketObj->m_recyconnectionList.begin();
+            posend = pSocketObj->m_recyconnectionList.end();
+            for(; pos != posend; ++pos)
+            {
+                p_Conn = (*pos);
+                if(
+                    ( (p_Conn->inRecyTime + pSocketObj->m_RecyConnectionWaitTime) > currtime)
+                     &&(g_stopEvent == 0))
+                {
+                    continue;
+                }
+
+                if(p_Conn->iThrowsendCount > 0)
+                {
+                    qc_log_stderr(0,"CSocket::ServerRecyConnectionThread()中到释放时间却发现p_Conn.iThrowsendCount!=0");
+                }
+
+                //到这里表示可以释放
+                --pSocketObj->m_totol_recyconnection_n;
+                pSocketObj->m_recyconnectionList.erase(pos);//迭代器已经失效，但pos所指内容在p_Conn里保存着呢
+                pSocketObj->qc_free_connection(p_Conn);//归还参数p_Conn所代表的连接到连接池中
+                goto lblRRTD;
+            }// end for
+            err = pthread_mutex_unlock(&pSocketObj->m_recyconnqueueMutex);
+            if(err != 0)
+            {
+                qc_log_stderr(err,"CSocket::ServerRecyConnectionThread()pthread_mutex_unlock()失败，返回的错误码为%d!",err);
+            }
+        }//end if
+
+        if(g_stopEvent == 1)
+        {
+            if(pSocketObj->m_totol_recyconnection_n > 0)
+            {
+                err = pthread_mutex_lock(&pSocketObj->m_recyconnqueueMutex);
+                if(err != 0) qc_log_stderr(err,"CSocket::ServerRecyConnectionThread()中pthread_mutex_lock2()失败，返回的错误码为%d!",err);
+
+        lblRRTD2:
+                pos    = pSocketObj->m_recyconnectionList.begin();
+                posend = pSocketObj->m_recyconnectionList.end();
+                for(; pos != posend; ++pos)
+                {
+                    p_Conn = (*pos);
+                    --pSocketObj->m_totol_recyconnection_n;        //待释放连接队列大小-1
+                    pSocketObj->m_recyconnectionList.erase(pos);   //迭代器已经失效，但pos所指内容在p_Conn里保存着呢
+                    pSocketObj->qc_free_connection(p_Conn);	   //归还参数pConn所代表的连接到到连接池中
+                    goto lblRRTD2; 
+                } //end for
+                err = pthread_mutex_unlock(&pSocketObj->m_recyconnqueueMutex); 
+                if(err != 0)  qc_log_stderr(err,"CSocket::ServerRecyConnectionThread()pthread_mutex_unlock2()失败，返回的错误码为%d!",err);
+            }
+            break;
+        }
+    }
+
+    return (void*)0;
+}          

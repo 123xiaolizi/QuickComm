@@ -149,7 +149,7 @@ private:
 	ssize_t sendproc(lpqc_connection_t c,char *buff,ssize_t size);       //将数据发送到客户端 
 
 	//获取对端信息相关                                              
-	size_t ngx_sock_ntop(struct sockaddr *sa,int port,u_char *text,size_t len);  //根据参数1给定的信息，获取地址端口字符串，返回这个字符串的长度
+	size_t qc_sock_ntop(struct sockaddr *sa,int port,u_char *text,size_t len);  //根据参数1给定的信息，获取地址端口字符串，返回这个字符串的长度
 
 	//连接池 或 连接 相关
 	void initconnection();                                                //初始化连接池
