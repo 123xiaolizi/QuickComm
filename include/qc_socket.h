@@ -115,7 +115,7 @@ public:
 
 public:	
 	int  qc_epoll_init();                                                //epoll功能初始化	
-	//int  ngx_epoll_add_event(int fd,int readevent,int writeevent,uint32_t otherflag,uint32_t eventtype,lpngx_connection_t pConn);     
+	//int  qc_epoll_add_event(int fd,int readevent,int writeevent,uint32_t otherflag,uint32_t eventtype,lpqc_connection_t pConn);     
 	                                                                      //epoll增加事件
 	int  qc_epoll_process_events(int timer);                             //epoll等待接收和处理事件
 
@@ -215,7 +215,7 @@ private:
 	int                            m_RecyConnectionWaitTime;              //等待这么些秒后才回收连接
 
 
-	//lpngx_connection_t             m_pfree_connections;                //空闲连接链表头，连接池中总是有某些连接被占用，为了快速在池中找到一个空闲的连接，我把空闲的连接专门用该成员记录;
+	//lpqc_connection_t             m_pfree_connections;                //空闲连接链表头，连接池中总是有某些连接被占用，为了快速在池中找到一个空闲的连接，我把空闲的连接专门用该成员记录;
 	                                                                        //【串成一串，其实这里指向的都是m_pconnections连接池里的没有被使用的成员】
 	
 	

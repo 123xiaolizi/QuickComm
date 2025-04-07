@@ -10,6 +10,7 @@
 #include <pthread.h> //多线程
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 
 
@@ -132,4 +133,60 @@ void CSocket::clearAllFromTimerQueue()
 		--m_cur_size_; 		
 	}
 	m_timerQueuemap.clear();
+}
+
+//时间队列监视线程，处理到期不发心跳包的用户踢出的线程
+void* CSocket::ServerTimerQueueMonitorThread(void *threadData)
+{
+	ThreadItem *pThread = static_cast<ThreadItem*>(threadData);
+	CSocket *pSocketObj = pThread->_pThis;
+
+	time_t absolute_time, cur_time;
+	int err;
+
+	while(g_stopEvent == 0)
+	{
+		//初步判断
+		if(pSocketObj->m_cur_size_ > 0)
+		{
+			//最近发生事件的时间放absolute_time
+			absolute_time = pSocketObj->m_timer_value_;
+			cur_time = time(nullptr);
+			if(absolute_time < cur_time)
+			{
+				//时间到
+				std::list<LPSTRUC_MSG_HEADER> m_lsIdleList;//保存要处理的内容
+				LPSTRUC_MSG_HEADER result;
+
+				err = pthread_mutex_lock(&pSocketObj->m_timequeueMutex);
+				if(err != 0) qc_log_stderr(err,"CSocket::ServerTimerQueueMonitorThread()中pthread_mutex_lock()失败，返回的错误码为%d!",err);
+				while ( (result = pSocketObj->GetOverTimeTimer(cur_time)) != nullptr)
+				{
+					m_lsIdleList.push_back(result);
+				}
+
+				err = pthread_mutex_unlock(&pSocketObj->m_timequeueMutex);
+				if(err != 0) qc_log_stderr(err,"CSocket::ServerTimerQueueMonitorThread()pthread_mutex_unlock()失败，返回的错误码为%d!",err);
+				LPSTRUC_MSG_HEADER tmpmsg;
+				while (!m_lsIdleList.empty())
+				{
+					tmpmsg = m_lsIdleList.front();
+					m_lsIdleList.pop_front();
+					pSocketObj->procPingTimeOutChecking(tmpmsg, cur_time);
+				}
+			
+			}
+		}
+		usleep(500 * 1000);
+	}
+
+	return (void*)0;
+}
+
+
+//心跳包检测时间到，该去检测心跳包是否超时的事宜，本函数只是把内存释放，子类应该重新事先该函数以实现具体的判断动作
+void CSocket::procPingTimeOutChecking(LPSTRUC_MSG_HEADER tmpmsg,time_t cur_time)
+{
+	CMemory *p_memory = CMemory::GetInstance();
+	p_memory->FreeMemory(tmpmsg);
 }

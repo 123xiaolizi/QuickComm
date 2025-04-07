@@ -13,7 +13,7 @@
 #define _DATA_BUFSIZE_       20 //定义一个固定大小的数组专门用来收包头
 
 //结构定义
-#pragma pack(1);//1字节对齐
+#pragma pack(1)//1字节对齐
 //包头结构
 typedef struct _COMM_PKG_HEADER
 {

@@ -25,8 +25,6 @@ void qc_master_process_cycle()
 
     sigemptyset(&set);   //清空信号集
 
-    //下列这些信号在执行本函数期间不希望收到（保护不希望由信号中断的代码临界区）
-    //建议fork()子进程时学习这种写法，防止信号的干扰；
     sigaddset(&set, SIGCHLD);     //子进程状态改变
     sigaddset(&set, SIGALRM);     //定时器超时
     sigaddset(&set, SIGIO);       //异步I/O
@@ -37,54 +35,50 @@ void qc_master_process_cycle()
     sigaddset(&set, SIGWINCH);    //终端窗口大小改变
     sigaddset(&set, SIGTERM);     //终止
     sigaddset(&set, SIGQUIT);     //终端退出符
-
-    //sigprocmask 是一个系统调用，用于检查或修改调用进程的信号掩码，该掩码决定了哪些信号当前被阻塞而无法递送。
-    if (sigprocmask(SIG_BLOCK, &set, nullptr) == -1)
-    {
+    //.........可以根据开发的实际需要往其中添加其他要屏蔽的信号......
+    
+    //设置，此时无法接受的信号；阻塞期间，你发过来的上述信号，多个会被合并为一个，暂存着，等你放开信号屏蔽后才能收到这些信号。。。
+    //sigprocmask()在第三章第五节详细讲解过
+    if (sigprocmask(SIG_BLOCK, &set, NULL) == -1) //第一个参数用了SIG_BLOCK表明设置 进程 新的信号屏蔽字 为 “当前信号屏蔽字 和 第二个参数指向的信号集的并集
+    {        
         qc_log_error_core(QC_LOG_ALERT,errno,"qc_master_process_cycle()中sigprocmask()失败!");
     }
+    //即便sigprocmask失败，程序流程 也继续往下走
 
-    //设置主进程标题
+    //首先我设置主进程标题---------begin
     size_t size;
-    int i;
-    size = sizeof(master_process);
-    size += g_argvneedmem;
-    if (size < 1000)
+    int    i;
+    size = sizeof(master_process);  //注意我这里用的是sizeof，所以字符串末尾的\0是被计算进来了的
+    size += g_argvneedmem;          //argv参数长度加进来    
+    if(size < 1000) //长度小于这个，我才设置标题
     {
         char title[1000] = {0};
-        strcpy(title,(const char*)master_process);
-        strcat(title, " ");
-        for(i = 0; i < g_os_argc; ++i)
+        strcpy(title,(const char *)master_process); //"master process"
+        strcat(title," ");  //跟一个空格分开一些，清晰    //"master process "
+        for (i = 0; i < g_os_argc; i++)         //"master process ./nginx"
         {
-            strcat(title, g_os_argv[i]);
-        }
-        qc_setproctitle(title);//设置标题
-        qc_log_error_core(QC_LOG_NOTICE, 0, "%s %d [master进程] 启动并开始运行......!",title,qc_pid);
-    }
+            strcat(title,g_os_argv[i]);
+        }//end for
+        qc_setproctitle(title); //设置标题
+        qc_log_error_core(QC_LOG_NOTICE,0,"%s %P 【master进程】启动并开始运行......!",title,qc_pid); //设置标题时顺便记录下来进程名，进程id等信息到日志
+    }    
+    //首先我设置主进程标题---------end
+        
+    //从配置文件中读取要创建的worker进程数量
+    CConfig *p_config = CConfig::GetInstance(); //单例类
+    int workprocess = p_config->GetIntDefault("WorkerProcesses",1); //从配置文件中得到要创建的worker进程数量
+    qc_start_worker_processes(workprocess);  //这里要创建worker子进程
 
-    //从配置文件中读取要创建工作进程的数量
-    CConfig *conf = CConfig::GetInstance();
-    int workprocess = conf->GetIntDefault("WorkerProcesses",2);
-    //创建worker子进程
-    qc_start_worker_processes(workprocess);
-
-    /*
-    //sigsuspend是一个原子操作，包含4个步骤：
-    //a)根据给定的参数设置新的mask 并 阻塞当前进程【因为是个空集，所以不阻塞任何信号】
-    //b)此时，一旦收到信号，便恢复原先的信号屏蔽
-    //c)调用该信号对应的信号处理函数
-    //d)信号处理函数返回后，sigsuspend返回，使程序流程继续往下走
-    */
-    //创建子进程后，父进程的执行流程会返回到这里
-    sigemptyset(&set);//信号屏蔽字为空，表示不屏蔽任何信号
-
-    for(;;)
+    //创建子进程后，父进程的执行流程会返回到这里，子进程不会走进来    
+    sigemptyset(&set); //信号屏蔽字为空，表示不屏蔽任何信号
+    
+    for ( ;; ) 
     {
-        //阻塞在这里，等待一个信号，此时进程是挂起的，不占用cpu时间，只有收到信号才会被唤醒（返回）
-        sigsuspend(&set);
 
-        sleep(1);
-    }
+    
+        sigsuspend(&set); //阻塞在这里，等待一个信号，此时进程是挂起的，不占用cpu时间，只有收到信号才会被唤醒（返回）；
+
+    }// end for(;;)
     return;
 }
 
@@ -135,29 +129,50 @@ static void qc_worker_process_cycle(int inum,const char *pprocname)
     for(;;)
     {
         //处理网络事件和定时器事件
-        //qc_process_events_and_timers();
+        qc_process_events_and_timers();
     }
 
+    //如果从这个循环跳出来
+    g_threadpool.StopAll();      //考虑在这里停止线程池；
+    g_socket.Shutdown_subproc(); //socket需要释放的东西考虑释放；
     return;
 }
 
 //子进程创建时调用该函数进行初始化工作
 static void qc_worker_process_init(int inum)
 {
-    sigset_t set; //信号集
-    
-    sigemptyset(&set);
-    if(sigprocmask(SIG_SETMASK, &set, nullptr) == -1)
+    sigset_t  set;      //信号集
+
+    sigemptyset(&set);  //清空信号集
+    if (sigprocmask(SIG_SETMASK, &set, NULL) == -1)  //原来是屏蔽那10个信号【防止fork()期间收到信号导致混乱】，现在不再屏蔽任何信号【接收任何信号】
     {
-        qc_log_error_core(QC_LOG_ALERT, errno,"qc_worker_process_init()中sigprocmask(SIG_SETMASK) 失败!");
+        qc_log_error_core(QC_LOG_ALERT,errno,"qc_worker_process_init()中sigprocmask()失败!");
     }
-    CConfig *conf = CConfig::GetInstance();
-    int tmpthreadnums = conf->GetIntDefault("ProcMsgRecvWorkThreadCount",5);
-    //启动线程池
 
-    //启动网络服务。。。
+    //线程池代码，率先创建，至少要比和socket相关的内容优先
+    CConfig *p_config = CConfig::GetInstance();
+    int tmpthreadnums = p_config->GetIntDefault("ProcMsgRecvWorkThreadCount",5); //处理接收到的消息的线程池中线程数量
+    if(g_threadpool.Create(tmpthreadnums) == false)  //创建线程池中线程
+    {
+        //内存没释放，但是简单粗暴退出；
+        exit(-2);
+    }
+    sleep(1); //再休息1秒；
 
-
+    if(g_socket.Initialize_subproc() == false) //初始化子进程需要具备的一些多线程能力相关的信息
+    {
+        //内存没释放，但是简单粗暴退出；
+        exit(-2);
+    }
+    
+    //如下这些代码参照官方nginx里的qc_event_process_init()函数中的代码
+    g_socket.qc_epoll_init();           //初始化epoll相关内容，同时 往监听socket上增加监听事件，从而开始让监听端口履行其职责
+    //g_socket.qc_epoll_listenportstart();//往监听socket上增加监听事件，从而开始让监听端口履行其职责【如果不加这行，虽然端口能连上，但不会触发qc_epoll_process_events()里边的epoll_wait()往下走】
+    
+    
+    //....将来再扩充代码
+    //....
     return;
+
 
 }

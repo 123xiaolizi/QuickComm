@@ -4,7 +4,8 @@
 #include "qc_threadpool.h"
 #include <sys/types.h>
 #include <cstdarg>
-
+#include <csignal>
+#include "qc_slogic.h"
 
 // 和运行日志相关
 typedef struct
@@ -22,7 +23,7 @@ extern pid_t qc_pid; // 声明（告诉编译器变量在其他地方定义）
 extern pid_t qc_parent;
 extern int qc_process;
 extern qc_log_t qc_log;
-//extern sig_atomic_t  qc_reap; 
+extern sig_atomic_t  qc_reap; 
 extern int g_stopEvent;
 
 extern size_t g_argvneedmem;
@@ -32,8 +33,8 @@ extern char **g_os_argv;
 extern char *gp_envmem;
 extern int g_daemonized;
 
-extern CSocket  g_socket;
-//extern CLogicSocket  g_socket;  
+//extern CSocket  g_socket;
+extern CLogicSocket  g_socket;  
 extern CThreadPool   g_threadpool;
 
 

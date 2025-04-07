@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../../lib/libnet.a  CMakeFiles/net.dir/qc_socket_accept.cc.o CMakeFiles/net.dir/qc_socket_conn.cc.o
-/usr/bin/ranlib ../../lib/libnet.a

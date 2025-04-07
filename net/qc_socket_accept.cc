@@ -76,7 +76,7 @@ void CSocket::qc_event_accept(lpqc_connection_t oldc)
             }
             if (err == EMFILE || err == ENFILE)
             {
-                // do nothing，这个nginx官方做法是先把读事件从listen socket上移除，然后再弄个定时器，定时器到了则继续执行该函数，但是定时器到了有个标记，会把读事件增加到listen socket上去；
+                // do nothing，nginx官方做法是先把读事件从listen socket上移除，然后再弄个定时器，定时器到了则继续执行该函数，但是定时器到了有个标记，会把读事件增加到listen socket上去；
                 // 这里目前先不处理
             }
             return;
@@ -131,7 +131,7 @@ void CSocket::qc_event_accept(lpqc_connection_t oldc)
         newc->whandler = &CSocket::qc_write_request_handler;
 
         if (qc_epoll_oper_event(
-                s,                      //socekt句柄 
+                s,                      //Socket句柄 
                 EPOLL_CTL_ADD,          //事件类型，这里是增加
                 EPOLLIN | EPOLLRDHUP,   //标志，这里代表要增加的标志,EPOLLIN：可读，EPOLLRDHUP：TCP连接的远端关闭或者半关闭 ，如果边缘触发模式可以增加 EPOLLET
                 0,                      //对于事件类型为增加的，不需要这个参数

@@ -16,6 +16,7 @@
 #include <errno.h>     //errno
 #include <sys/ioctl.h> //ioctl
 #include <arpa/inet.h>
+#include <pthread.h>
 
 CSocket::CSocket()
 {
@@ -313,41 +314,44 @@ bool CSocket::setnonblocking(int sockfd)
 //把数据扔到待发送对列中 
 void CSocket::msgSend(char *psendbuf)
 {
-    CMemory *p_memory = CMemory::GetInstance();
+    
+   CMemory *p_memory = CMemory::GetInstance();
 
-    CLock lock(&m_sendMessageQueueMutex); //互斥量
+   CLock lock(&m_sendMessageQueueMutex);  //互斥量
 
-    //发送队列过大会给服务器带来风险，再来就丢了
-    if(m_iSendMsgQueueCount > 50000)//50000待发送已经很大了，说明有恶意用户只发不收
-    {
-        m_iDiscardSendPkgCount++;
-        p_memory->FreeMemory(psendbuf);
-        return;
-    }
+   //发送消息队列过大也可能给服务器带来风险
+   if(m_iSendMsgQueueCount > 50000)
+   {
+       //发送队列过大，比如客户端恶意不接受数据，就会导致这个队列越来越大
+       //那么可以考虑为了服务器安全，干掉一些数据的发送，虽然有可能导致客户端出现问题，但总比服务器不稳定要好很多
+       m_iDiscardSendPkgCount++;
+       p_memory->FreeMemory(psendbuf);
+       return;
+   }
+   
+   //总体数据并无风险，不会导致服务器崩溃，要看看个体数据，找一下恶意者了    
+   LPSTRUC_MSG_HEADER pMsgHeader = (LPSTRUC_MSG_HEADER)psendbuf;
+   lpqc_connection_t p_Conn = pMsgHeader->pConn;
+   if(p_Conn->iSendCount > 400)
+   {
+       //该用户收消息太慢【或者干脆不收消息】，累积的该用户的发送队列中有的数据条目数过大，认为是恶意用户，直接切断
+       qc_log_stderr(0,"CSocket::msgSend()中发现某用户%d积压了大量待发送数据包，切断与他的连接！",p_Conn->fd);      
+       m_iDiscardSendPkgCount++;
+       p_memory->FreeMemory(psendbuf);
+       zdClosesocketProc(p_Conn); //直接关闭
+       return;
+   }
 
-    //总的代发数据并无风险，找一下恶意用户
-    LPSTRUC_MSG_HEADER pMsgHeader = (LPSTRUC_MSG_HEADER)psendbuf;
-    lpqc_connection_t p_Conn = pMsgHeader->pConn;
-    if (p_Conn->iSendCount > 400)
-    {
-        //屯了这么多包不收，我认为它是恶意用户
-        qc_log_stderr(0,"CSocket::msgSend()中发现某用户%d积压了大量待发送数据包，切断与他的连接！",p_Conn->fd);      
-        m_iDiscardSendPkgCount++;
-        p_memory->FreeMemory(psendbuf);
-        zdClosesocketProc(p_Conn); //直接关闭
-        return;
-    }
+   ++p_Conn->iSendCount; //发送队列中有的数据条目数+1；
+   m_MsgSendQueue.push_back(psendbuf);     
+   ++m_iSendMsgQueueCount;   //原子操作
 
-    ++p_Conn->iSendCount; //发送队列中有的数据条目数+1；
-    m_MsgSendQueue.push_back(psendbuf);     
-    ++m_iSendMsgQueueCount;   //原子操作
-
-    //将信号量的值+1,这样其他卡在sem_wait的就可以走下去
-    if(sem_post(&m_semEventSendQueue)==-1)  //让ServerSendQueueThread()流程走下来干活
-    {
-        qc_log_stderr(0,"CSocket::msgSend()中sem_post(&m_semEventSendQueue)失败.");      
-    }
-    return;
+   //将信号量的值+1,这样其他卡在sem_wait的就可以走下去
+   if(sem_post(&m_semEventSendQueue)==-1)  //让ServerSendQueueThread()流程走下来干活
+   {
+       qc_log_stderr(0,"CSocket::msgSend()中sem_post(&m_semEventSendQueue)失败.");      
+   }
+   return;
     
 
 }
@@ -465,7 +469,7 @@ int  CSocket::qc_epoll_init()
 
         //往监听socket上增加监听事件，从而开始让监听端口履行其职责【如果不加这行，虽然端口能连上，但不会触发qc_epoll_process_events()里边的epoll_wait()往下走】
         if(qc_epoll_oper_event(
-                                (*pos)->fd,         //socekt句柄
+                                (*pos)->fd,         //Socket句柄
                                 EPOLL_CTL_ADD,      //事件类型，这里是增加
                                 EPOLLIN|EPOLLRDHUP, //标志，这里代表要增加的标志,EPOLLIN：可读，EPOLLRDHUP：TCP连接的远端关闭或者半关闭
                                 0,                  //对于事件类型为增加的，不需要这个参数
@@ -483,6 +487,13 @@ int  CSocket::qc_epoll_init()
 //epoll等待接收和处理事件
 int  CSocket::qc_epoll_process_events(int timer)
 {
+    //等待事件，事件会返回到m_events里，最多返回qc_MAX_EVENTS个事件【因为我只提供了这些内存】；
+    //如果两次调用epoll_wait()的事件间隔比较长，则可能在epoll的双向链表中，积累了多个事件，所以调用epoll_wait，可能取到多个事件
+    //阻塞timer这么长时间除非：a)阻塞时间到达 b)阻塞期间收到事件【比如新用户连入】会立刻返回c)调用时有事件也会立刻返回d)如果来个信号，比如你用kill -1 pid测试
+    //如果timer为-1则一直阻塞，如果timer为0则立即返回，即便没有任何事件
+    //返回值：有错误发生返回-1，错误在errno中，比如你发个信号过来，就返回-1，错误信息是(4: Interrupted system call)
+    //       如果你等待的是一段时间，并且超时了，则返回0；
+    //       如果返回>0则表示成功捕获到这么多个事件【返回值里】
     int events = epoll_wait(m_epollhandle,m_events,QC_MAX_EVENTS,timer);    
     
     if(events == -1)
@@ -512,11 +523,13 @@ int  CSocket::qc_epoll_process_events(int timer)
             return 1;
         }
         //无限等待【所以不存在超时】，但却没返回任何事件，这应该不正常有问题        
-        qc_log_error_core(QC_LOG_ALERT,0,"CSocekt::qc_epoll_process_events()中epoll_wait()没超时却没返回任何事件!"); 
+        qc_log_error_core(QC_LOG_ALERT,0,"CSocket::qc_epoll_process_events()中epoll_wait()没超时却没返回任何事件!"); 
         return 0; //非正常返回 
     }
 
-
+    //会惊群，一个telnet上来，4个worker进程都会被惊动，都执行下边这个
+    //qc_log_stderr(0,"惊群测试:events=%d,进程id=%d",events,qc_pid); 
+    //qc_log_stderr(0,"----------------------------------------"); 
 
     //走到这里，就是属于有事件收到了
     lpqc_connection_t p_Conn;
@@ -526,22 +539,16 @@ int  CSocket::qc_epoll_process_events(int timer)
     {
         p_Conn = (lpqc_connection_t)(m_events[i].data.ptr);           //qc_epoll_add_event()给进去的，这里能取出来
 
-        
 
         //能走到这里，我们认为这些事件都没过期，就正常开始处理
         revents = m_events[i].events;//取出事件类型
         
+      
 
         if(revents & EPOLLIN)  //如果是读事件
         {
-            //qc_log_stderr(errno,"数据来了来了来了 ~~~~~~~~~~~~~.");
-            //一个客户端新连入，这个会成立，
-            //已连接发送数据来，这个也成立；
-            //c->r_ready = 1;                         //标记可以读；【从连接池拿出一个连接时这个连接的所有成员都是0】            
+           
             (this->* (p_Conn->rhandler) )(p_Conn);    //注意括号的运用来正确设置优先级，防止编译出错；【如果是个新客户连入
-                                                      //如果新连接进入，这里执行的应该是CSocekt::qc_event_accept(c)】            
-                                                      //如果是已经连入，发送数据到这里，则这里执行的应该是 CSocekt::qc_read_request_handler()     
-                                     
         }
         
         if(revents & EPOLLOUT) //如果是写事件【对方关闭连接也触发这个，再研究。。。。。。】，注意上边的 if(revents & (EPOLLERR|EPOLLHUP))  revents |= EPOLLIN|EPOLLOUT; 读写标记都给加上了
@@ -549,17 +556,11 @@ int  CSocket::qc_epoll_process_events(int timer)
             //qc_log_stderr(errno,"22222222222222222222.");
             if(revents & (EPOLLERR | EPOLLHUP | EPOLLRDHUP)) //客户端关闭，如果服务器端挂着一个写通知事件，则这里个条件是可能成立的
             {
-                //EPOLLERR：对应的连接发生错误                     8     = 1000 
-                //EPOLLHUP：对应的连接被挂起                       16    = 0001 0000
-                //EPOLLRDHUP：表示TCP连接的远端关闭或者半关闭连接   8192   = 0010  0000   0000   0000
-                //我想打印一下日志看一下是否会出现这种情况
-                //8221 = ‭0010 0000 0001 1101‬  ：包括 EPOLLRDHUP ，EPOLLHUP， EPOLLERR
-                //我们只有投递了 写事件，但对端断开时，程序流程才走到这里，投递了写事件意味着 iThrowsendCount标记肯定被+1了，这里我们减回
                 --p_Conn->iThrowsendCount;                 
             }
             else
             {
-                (this->* (p_Conn->whandler) )(p_Conn);   //如果有数据没有发送完毕，由系统驱动来发送，则这里执行的应该是 CSocekt::qc_write_request_handler()
+                (this->* (p_Conn->whandler) )(p_Conn);   //如果有数据没有发送完毕，由系统驱动来发送，则这里执行的应该是 CSocket::qc_write_request_handler()
             }            
         }
     } //end for(int i = 0; i < events; ++i)     
@@ -731,7 +732,7 @@ void* CSocket::ServerSendQueueThread(void *threadData)
                                 0,//对于事件类型为增加的，EPOLL_CTL_MOD需要这个参数, 0：增加   1：去掉 2：完全覆盖
                                 p_Conn) == -1)
                         {
-                            qc_log_stderr(errno,"CSocket::ServerSendQueueThread()ngx_epoll_oper_event()失败.");
+                            qc_log_stderr(errno,"CSocket::ServerSendQueueThread()qc_epoll_oper_event()失败.");
                         }
 
                     }
@@ -758,7 +759,7 @@ void* CSocket::ServerSendQueueThread(void *threadData)
                             0,
                             p_Conn) == -1)
                     {
-                        qc_log_stderr(errno,"CSocket::ServerSendQueueThread()ngx_epoll_oper_event()-2失败.");
+                        qc_log_stderr(errno,"CSocket::ServerSendQueueThread()qc_epoll_oper_event()-2失败.");
                     }
                     continue;
                 }
